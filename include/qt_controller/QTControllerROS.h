@@ -1,13 +1,13 @@
 /*
- * Filename: auv_controller/AUVControllerROS.h
- * Path: auv_controller
+ * Filename: QT_controller/QTControllerROS.h
+ * Path: QT_controller
  * Created Date: Wednesday, September 9th 2020, 9:24:05 am
  * Author: zhao wang
  * 
  * Copyright (c) 2020 Your Company
  */
-#ifndef ARMSAUV_CONTROLLER_ROS_H_
-#define ARMSAUV_CONTROLLER_ROS_H_
+#ifndef ARMSQT_CONTROLLER_ROS_H_
+#define ARMSQT_CONTROLLER_ROS_H_
 
 #include <thread>
 #include <mutex>
@@ -27,23 +27,23 @@
 #include <uuv_gazebo_ros_plugins_msgs/FloatStamped.h>
 #include <tf/transform_datatypes.h>
 
-#include "AUVController.h"
+#include "QTController.h"
 
-namespace auv_controller{
+namespace qt_controller{
     /**
-     * @brief AUVController ROS wrapper for armsauv
+     * @brief QTController ROS wrapper for armsQT
      */
-    class ArmsAUVControllerROS{
+    class QTControllerROS{
     public:
         /**
          * @brief Constructor
          */
-        ArmsAUVControllerROS(std::string name);
+        QTControllerROS(std::string name);
 
         /**
          * @brief Deconstructor
          */ 
-        ~ArmsAUVControllerROS();
+        ~QTControllerROS();
 
     private:
         /**
@@ -223,27 +223,27 @@ namespace auv_controller{
         }
         
         /**
-         * @brief Print auv dynamic parameters on the console
+         * @brief Print QT dynamic parameters on the console
          */ 
-        void printAUVDynamicParams();
+        void printQTDynamicParams();
 
         /**
-         * @brief Print auv control parameters on the console
+         * @brief Print QT control parameters on the console
          */ 
-        void printAUVCtrlParams();
+        void printQTCtrlParams();
 
         /**
-         * @brief Print auv force parameters on the console
+         * @brief Print QT force parameters on the console
          */ 
-        void printAUVForceParams();
+        void printQTForceParams();
 
         /**
-         * @brief Print auv body parameters on the console
+         * @brief Print QT body parameters on the console
          */ 
-        void printAUVBodyParams();
+        void printQTBodyParams();
 
     private:
-        AUVController* controller_;
+        QTController* controller_;
 
         ros::Publisher fin0_pub_, fin1_pub_, fin2_pub_, fin3_pub_, fin4_pub_, fin5_pub_; // fins input
         ros::Publisher thruster0_pub_; // thruster input
@@ -255,7 +255,7 @@ namespace auv_controller{
         double dt_; // control period
         int rpm_; // rotate per minutes of thruster
         uint32_t seq_; // header sequence
-        std::string base_frame_; // base frame name of AUV
+        std::string base_frame_; // base frame name of QT
 
         double x_, y_, z_; // position
         double x_dot_, y_dot_, z_dot_; // linear velocity
@@ -275,7 +275,7 @@ namespace auv_controller{
         std::mutex depth_mutex_, pitch_mutex_, yaw_mutex_;
         std::mutex x_d_mutex_, y_d_mutex_;
 
-    }; // AUVControllerROS
+    }; // QTControllerROS
 }; // ns
 
 #endif

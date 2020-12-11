@@ -56,23 +56,15 @@ namespace qt_controller{
     }
 
     /**
-     * @brief Set force parameters
-     */ 
-    bool QTController::setForceParams(const std::vector<double>& force){
-        if(force.size() == force_num_){
-            setForceParams(force[0], force[1], force[2], force[3], force[4], force[5]);
-            return true;
-        }
-        return false;
-    }
-
-    /**
      * @brief Initialize with default paramters
      */ 
     void QTController::defaultInit(){
-        setQTBodyParams(4390, 8.534, 4390*9.81, 4390*9,81, 0.0, 0.0, -0.137, 0.0, 0.0, 0.0, 1315, 5900, 5057);
+        double bouy = 4390.0 * 9.81;
+        double weight = 4390.0 * 9.81;
+        setQTBodyParams(4390.0, 8.534, weight, bouy, 0.0, 0.0, -0.137, 0.0, 0.0, 0.0, 1315.0, 5900.0, 5057.0);
         rho_ = 1025; 
         d00_ = 0.7159;
+        double d04 = pow(d00_, 4);
         double len = body_.getLength();
         double d0 = 0.5 * rho_; double d1 = d0 * len; double d2 = d1 * len; double d3 = d2 * len;
         double d4 = d3 * len; double d5 = d4 * len;
@@ -80,7 +72,7 @@ namespace qt_controller{
         setRouderPosition(1.865, 1.865, -3.369, -3.369, -3.369,
                           -0.699, 0.699, -0.621, 0.621, 0.0,
                           0.013, 0.013, -0.0844, -0.0844, 0.0);
-        setForceParams(rho, d2, d04_, rouder_);
+        setForceParams(rho_, d2, d04, rouder_);
         setCtrlParams(0.05, 0.05, 0.5, 0.15, 0.15, 0.4, 0.0, 0.0, 0.0, 0.01);
 
         depth_sf_.init();
@@ -158,18 +150,17 @@ namespace qt_controller{
     void QTController::serializeQTDynamicParams(std::stringstream& str){
         str << "xdotu: " << dynamic_.x_dotu_ << " ydotv: " << dynamic_.y_dotv_ <<" ydotr: " << dynamic_.y_dotr_ << " zdotw: " << dynamic_.z_dotw_ << " zdotq: " << dynamic_.z_dotq_;
         str << " kdotp: " << dynamic_.k_dotp_ << " mdotw: " << dynamic_.m_dotw_ << " mdotq: " << dynamic_.m_dotq_ << " ndotv: " << dynamic_.n_dotv_ << " ndotr: " << dynamic_.n_dotr_;
-        str << " xuu: " << dynamic_.x_uu_ << " yvv: " << dynamic_.y_vv_ << " yrr: " << dynamic_.y_rr_ << " zww: " << dynamic_.z_ww_ << " zqq: " << dynamic_.z_qq_;
-        str << " kpp: " << dynamic_.k_pp_ << " mww: " << dynamic_.m_ww_ << " mqq: " << dynamic_.m_qq_ << " nvv: " << dynamic_.n_vv_ << " nrr: " << dynamic_.n_rr_;
-        str << " yuv: " << dynamic_.y_uv_ << " yur: " << dynamic_.y_ur_ << " zuw: " << dynamic_.z_uw_ << " zuq: " << dynamic_.z_uq_;
-        str << " muw: " << dynamic_.m_uw_ << " muq: " << dynamic_.m_uq_ << " nuv: " << dynamic_.n_uv_ << " nur: " << dynamic_.n_ur_;
     } 
 
     /**
      * @brief Serialize QT force parameters
      */ 
     void QTController::serializeQTForceParams(std::stringstream& str){
-        str << "yuudr: " << force_.y_uudr_ << " zuuds: " << force_.z_uuds_ << " zuudb: " << force_.z_uudb_;
-        str << " muuds: " << force_.m_uuds_ << " muudb: " << force_.m_uudb_ << " nuudr: " << force_.n_uudr_;
+        str << "xdndn: " << force_.xdndn_ << " ydr: " << force_.ydr_ << " zdfp: " << force_.zdfp_ 
+            << " zdfs: " << force_.zdfs_ << " zdap: " << force_.zdap_ << " zdas: " << force_.zdas_
+            << " kdfp: " << force_.kdfp_ << " kdfs: " << force_.kdfs_ << " kdap: " << force_.kdap_
+            << " kdas: " << force_.kdas_ << " kdr: " << force_.kdr_ << " mdfp: " << force_.mdfp_
+            << " mdfs: " << force_.mdfs_ << " mdap: " << force_.mdap_ << " mdas: " << force_.mdas_ << " ndr: " << force_.ndr_;
     }
 
     /**
@@ -226,7 +217,7 @@ namespace qt_controller{
         depth_sf_.a_zq_ = -(body_.m_ * body_.x_g_ + dynamic_.z_dotq_);
         depth_sf_.a_zs_ = zds * kinetic_.u_ * kinetic_.u_;
         depth_sf_.a_zb_ = zdb * kinetic_.u_ * kinetic_.u_;
-        depth_sf_.f_z_ = body_.m_ * body_.z_q_ * kinetic_.q_ * kinetic_.q_ + body_.m_ * kinetic_.u_ * kinetic_.q_ + dynamic_.z_uw_ * kinetic_.u_ * kinetic_.w_ +
+        depth_sf_.f_z_ = body_.m_ * body_.z_g_ * kinetic_.q_ * kinetic_.q_ + body_.m_ * kinetic_.u_ * kinetic_.q_ + dynamic_.z_uw_ * kinetic_.u_ * kinetic_.w_ +
             dynamic_.z_uq_ * kinetic_.u_ * kinetic_.q_ - dynamic_.x_dotu_ * kinetic_.u_ * kinetic_.q_ + (body_.w_ - body_.b_) * cos(kinetic_.theta_);
 
         // printf("Temp{a_zw:%f a_zq:%f a_zs:%f a_zb:%f f_z:%f}\n", depth_sf_.a_zw_, depth_sf_.a_zq_, depth_sf_.a_zs_, depth_sf_.a_zb_, depth_sf_.f_z_);

@@ -62,6 +62,7 @@ namespace qt_controller{
         controller_ = new QTController();
 
         /* parameters setting */
+        /*
         if(!controller_->setQTBodyParams(body_params)){
             ROS_WARN("Error in QT body parameters setting! Use default settings!");
             printQTBodyParams(); // print body parameters
@@ -78,13 +79,14 @@ namespace qt_controller{
             ROS_WARN("Error in QT force parameters setting! Use default settings!");
             printQTForceParams(); // print force parameters
         }
+        */
 
         // Create Timer
         // ros::Timer timer = nh.createTimer(ros::Duration(dt_), boost::bind(&QTControllerROS::timerCb, this, _1));
         
         // Create control thread
         ROS_INFO("Start control thread");
-	ctrl_thread_ = new boost::thread(boost::bind(&QTControllerROS::controlThread, this));	
+        ctrl_thread_ = new boost::thread(boost::bind(&QTControllerROS::controlThread, this));	
     }
 
     /**

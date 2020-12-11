@@ -162,11 +162,6 @@ namespace qt_controller{
         };
 
         /**
-         * @brief Set force parameters
-         */ 
-        bool setForceParams(const std::vector<double>& force);
-
-        /**
          * @brief Set rouder position
          */ 
         void setRouderPosition(double xfp, double xfs, double xap, double xas, double xr,
