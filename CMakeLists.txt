@@ -19,7 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -71,10 +71,10 @@ find_package(catkin REQUIRED COMPONENTS
 ## catkin specific configuration ##
 ###################################
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES qt_controller
-#  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy sensor_msgs std_msgs tf uuv_gazebo_ros_plugins_msgs
-#  DEPENDS system_lib
+    INCLUDE_DIRS include 
+    LIBRARIES qt_controller
+    CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy sensor_msgs std_msgs tf uuv_gazebo_ros_plugins_msgs
+    DEPENDS system_lib
 )
 
 ###########
@@ -84,20 +84,21 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/qt_controller.cpp
-# )
-
-## Add cmake target dependencies of the library
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_library(qt_controller
+  src/QTController.cpp
+  src/QTControllerROS.cpp
+)
 
 ## Declare a C++ executable
-# add_executable(${PROJECT_NAME}_node src/qt_controller_node.cpp)
+add_executable(qt_controller_node src/QTControllerNode.cpp)
+
+## Add cmake target dependencies of the library
+add_dependencies(qt_controller_node ${qt_controller_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Rename C++ executable without prefix
 # set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
@@ -106,9 +107,10 @@ include_directories(
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(qt_controller_node
+  qt_controller
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
