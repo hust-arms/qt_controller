@@ -28,8 +28,8 @@ namespace qt_controller{
         private_nh.getParam("body", body_params);
 
         // Default parameters
-        private_nh.param("base_frame", base_frame_, std::string("/uvsm/base_link"));
-        private_nh.param("rpm", rpm_, 1250);
+        private_nh.param("base_frame", base_frame_, std::string("/base_link"));
+        private_nh.param("rpm", rpm_, 2500);
         private_nh.param("control_period", dt_, 0.1);
         private_nh.param("xd", x_d_, 30.0);
         private_nh.param("yd", y_d_, 0.0);
@@ -43,6 +43,7 @@ namespace qt_controller{
         printf("Target:{rpm:%d ctrl_period:%f x:%f y:%f depth:%f pitch:%f yaw:%f}\n", rpm_, dt_, x_d_, y_d_, depth_d_, pitch_d_, yaw_d_);
 
         // Initialization of publisher and subscriber
+        /*
         imu_sub_ = nh.subscribe<sensor_msgs::Imu>("/uvsm/imu", 1, boost::bind(&QTControllerROS::imuCb, this, _1));
         pressure_sub_ = nh.subscribe<sensor_msgs::FluidPressure>("/uvsm/pressure", 1, boost::bind(&QTControllerROS::pressureCb, this, _1)); 
 	    posegt_sub_ = nh.subscribe<nav_msgs::Odometry>("/uvsm/pose_gt", 1, boost::bind(&QTControllerROS::posegtCb, this, _1));
@@ -58,7 +59,24 @@ namespace qt_controller{
         fin3_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/uvsm/fins/3/input", 1);
         fin4_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/uvsm/fins/4/input", 1);
         fin5_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/uvsm/fins/5/input", 1);
+        */
 
+        imu_sub_ = nh.subscribe<sensor_msgs::Imu>("/O_29qt/imu", 1, boost::bind(&QTControllerROS::imuCb, this, _1));
+        pressure_sub_ = nh.subscribe<sensor_msgs::FluidPressure>("/O_29qt/pressure", 1, boost::bind(&QTControllerROS::pressureCb, this, _1)); 
+	    posegt_sub_ = nh.subscribe<nav_msgs::Odometry>("/O_29qt/pose_gt", 1, boost::bind(&QTControllerROS::posegtCb, this, _1));
+        depth_sub_ = nh.subscribe<std_msgs::Float64>("/O_29qt/control_input/depth", 1, boost::bind(&QTControllerROS::depthCb, this, _1));
+        pitch_sub_ = nh.subscribe<std_msgs::Float64>("/O_29qt/control_input/pitch", 1, boost::bind(&QTControllerROS::pitchCb, this, _1));
+        yaw_sub_ = nh.subscribe<std_msgs::Float64>("/O_29qt/control_input/yaw", 1, boost::bind(&QTControllerROS::yawCb, this, _1));
+        dvl_sub_ = nh.subscribe<uuv_sensor_ros_plugins_msgs::DVL>("/O_29qt/dvl", 1, boost::bind(&QTControllerROS::dvlCb, this, _1));
+
+        thruster0_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/O_29qt/thrusters/0/input", 1);
+        fin0_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/O_29qt/fins/0/input", 1);
+        fin1_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/O_29qt/fins/1/input", 1);
+        fin2_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/O_29qt/fins/2/input", 1);
+        fin3_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/O_29qt/fins/3/input", 1);
+        fin4_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/O_29qt/fins/4/input", 1);
+        fin5_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/O_29qt/fins/5/input", 1);
+        
         controller_ = new QTController();
 
         /* parameters setting */
