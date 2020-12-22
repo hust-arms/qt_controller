@@ -55,13 +55,14 @@ namespace qt_controller{
          */
         void setParameters(double d0, double d1, double d2, double d3, double d4, double d5)
         {
+            double s = 1.0;
             // Associated mass
-            x_dotu_ = -0.000949 * d3; x_dotv_ = 0.0; x_dotw_ = 0.0; x_dotp_ = 0.0; x_dotq_ = 0.0; x_dotr_ = 0.0;
-            y_dotu_ = 0.0; y_dotv_ = -0.0408 * d3; y_dotw_ = 0.0; y_dotp_ = 0.000547 * d4; y_dotq_ = 0.0; y_dotr_ = 0.00139 * d4;
-            z_dotu_ = 0.0; z_dotv_ = 0.0; z_dotw_ = -0.0226 * d3; z_dotp_ = 0.0; z_dotq_ = -0.0000510 * d4; z_dotr_ = 0.0;
-            k_dotu_ = 0.0; k_dotv_ = 0.000547 * d4; k_dotw_ = 0.0; k_dotp_ = -0.000105 * d5; k_dotq_ = 0.0; k_dotr_ = -0.00000370 * d5;
-            m_dotu_ = 0.0; m_dotv_ = 0.0; m_dotw_ = -0.0000510 * d4; m_dotp_ = 0.0; m_dotq_ = -0.00175 * d5; m_dotr_ = 0.0;
-            n_dotu_ = 0.0; n_dotv_ = 0.00139 * d4; n_dotw_ = 0.0; n_dotp_ = -0.00000370 * d5; n_dotq_ = 0.0; n_dotr_ = -0.00183 * d5;
+            x_dotu_ = -0.000949 * d3 * s; x_dotv_ = 0.0; x_dotw_ = 0.0; x_dotp_ = 0.0; x_dotq_ = 0.0; x_dotr_ = 0.0;
+            y_dotu_ = 0.0; y_dotv_ = -0.0408 * d3 * s; y_dotw_ = 0.0; y_dotp_ = 0.000547 * d4 * s; y_dotq_ = 0.0; y_dotr_ = 0.00139 * d4 * s;
+            z_dotu_ = 0.0; z_dotv_ = 0.0; z_dotw_ = -0.0226 * d3 * s; z_dotp_ = 0.0; z_dotq_ = -0.0000510 * d4 * s; z_dotr_ = 0.0;
+            k_dotu_ = 0.0; k_dotv_ = 0.000547 * d4 * s; k_dotw_ = 0.0; k_dotp_ = -0.000105 * d5 * s; k_dotq_ = 0.0; k_dotr_ = -0.00000370 * d5 * s;
+            m_dotu_ = 0.0; m_dotv_ = 0.0; m_dotw_ = -0.0000510 * d4 * s; m_dotp_ = 0.0; m_dotq_ = -0.00175 * d5 * s; m_dotr_ = 0.0;
+            n_dotu_ = 0.0; n_dotv_ = 0.00139 * d4 * s; n_dotw_ = 0.0; n_dotp_ = -0.00000370 * d5 * s; n_dotq_ = 0.0; n_dotr_ = -0.00183 * d5 * s;
         
             // Damping
             x_uu_ = -0.00315 * d2; x_uv_ = 0.0; x_uw_ = 0.0; x_up_ = 0.0; x_uq_ = 0.0; x_ur_ = 0.0;
