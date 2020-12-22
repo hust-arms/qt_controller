@@ -59,13 +59,20 @@ namespace qt_controller{
      * @brief Initialize with default paramters
      */ 
     void QTController::defaultInit(){
-        double bouy = 4390.0 * 9.81;
-        double weight = 4390.0 * 9.81;
-        setQTBodyParams(4390.0, 8.534, weight, bouy, 0.0, 0.0, -0.137, 0.0, 0.0, 0.0, 1315.0, 5900.0, 5057.0);
+        double mass = 4390.0;
+        // double mass = 815650.0;
+        double bouy = 4690 * 9.81;
+        double weight = mass * 9.81;
+        double len = 8.534;
+        // double len = 40.97;
+        double bx = 0.0; double by = 0.0; double bz = -0.137;
+        double ixx = 1315.0; double iyy = 5900.0; double izz = 5057.0;
+        // double ixx = 1436900.0; double iyy = 25510000.0; double izz = 24921000.0;
+        setQTBodyParams(mass, len, weight, bouy, bx, by, bz, 0.0, 0.0, 0.0, ixx, iyy, izz);
         rho_ = 1025; 
         d00_ = 0.7159;
         double d04 = pow(d00_, 4);
-        double len = body_.getLength();
+        // double len = body_.getLength();
         double d0 = 0.5 * rho_; double d1 = d0 * len; double d2 = d1 * len; double d3 = d2 * len;
         double d4 = d3 * len; double d5 = d4 * len;
         setQTDynamic(d0, d1, d2, d3, d4, d5);
