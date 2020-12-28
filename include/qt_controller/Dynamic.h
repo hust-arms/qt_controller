@@ -55,7 +55,7 @@ namespace qt_controller{
          */
         void setParameters(double d0, double d1, double d2, double d3, double d4, double d5)
         {
-            double s = 1.0;
+            double s = 0.1;
             // Associated mass
             x_dotu_ = -0.000949 * d3 * s; x_dotv_ = 0.0; x_dotw_ = 0.0; x_dotp_ = 0.0; x_dotq_ = 0.0; x_dotr_ = 0.0;
             y_dotu_ = 0.0; y_dotv_ = -0.0408 * d3 * s; y_dotw_ = 0.0; y_dotp_ = 0.000547 * d4 * s; y_dotq_ = 0.0; y_dotr_ = 0.00139 * d4 * s;
