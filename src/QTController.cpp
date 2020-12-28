@@ -61,7 +61,8 @@ namespace qt_controller{
     void QTController::defaultInit(){
         double mass = 4390.0;
         // double mass = 815650.0;
-        double bouy = 4690 * 9.81;
+        // double bouy = 4690 * 9.81;
+        double bouy = 4390 * 9.81;
         double weight = mass * 9.81;
         double len = 8.534;
         // double len = 40.97;
@@ -80,7 +81,8 @@ namespace qt_controller{
                           -0.699, 0.699, -0.621, 0.621, 0.0,
                           0.013, 0.013, -0.0844, -0.0844, 0.0);
         setForceParams(rho_, d2, d04, rouder_);
-        setCtrlParams(0.05, 0.05, 0.5, 0.15, 0.15, 0.4, 0.0, 0.0, 0.0, 0.01);
+        // setCtrlParams(0.05, 0.05, 0.5, 0.15, 0.15, 0.4, 0.0, 0.0, 0.0, 0.01);
+        setCtrlParams(0.08, 0.1, 0.5, 0.15, 0.15, 0.4, 0.0, 0.0, 0.0, 0.1);
 
         depth_sf_.init();
         horizon_sf_.init();
@@ -187,7 +189,8 @@ namespace qt_controller{
     {
         // Update kinetic parameters
         kinetic_.setPosition(sensor.x_, sensor.y_, sensor.z_, sensor.roll_, sensor.pitch_, sensor.yaw_);
-        kinetic_.setVelocity(sensor.x_dot_, sensor.y_dot_, sensor.z_dot_, sensor.roll_dot_, sensor.pitch_dot_, sensor.yaw_dot_);
+        // kinetic_.setVelocity(sensor.x_dot_, sensor.y_dot_, sensor.z_dot_, sensor.roll_dot_, sensor.pitch_dot_, sensor.yaw_dot_);
+        kinetic_.setVelocity(sensor.x_dot_, 0.0, sensor.z_dot_, sensor.roll_dot_, sensor.pitch_dot_, sensor.yaw_dot_);
 
         // Draw and compute control mission parameters
         mission_.z_.ref_ = input.depth_d_;
@@ -198,7 +201,7 @@ namespace qt_controller{
         //        mission_.z_.pre_ref_, mission_.z_.pre_ref_dot_);
 
         // mission_.theta_.ref_ = input.pitch_d_ + 0.1 * atan((kinetic_.z_ - mission_.z_.ref_) / (4 * body_.l_));
-        mission_.theta_.ref_ = -0.33333 * atan((kinetic_.z_ - mission_.z_.ref_) / (1.5 * body_.l_));
+        mission_.theta_.ref_ = -0.33333 * atan(-(kinetic_.z_ - mission_.z_.ref_) / (1.5 * body_.l_));
         mission_.theta_.ref_dot_ = (mission_.theta_.ref_ - mission_.theta_.pre_ref_) / dt;
         mission_.theta_.ref_dot2_ = (mission_.theta_.ref_dot_ - mission_.theta_.pre_ref_dot_) / dt;
         mission_.theta_.Update();
@@ -235,7 +238,7 @@ namespace qt_controller{
         depth_sf_.a_ts_ = mds * kinetic_.u_ * kinetic_.u_;
         depth_sf_.a_tb_ = mdb * kinetic_.u_ * kinetic_.u_;
         depth_sf_.f_t_ = dynamic_.x_dotu_ * kinetic_.u_ * kinetic_.w_ + dynamic_.m_uw_ * kinetic_.u_ * kinetic_.w_ + dynamic_.m_uq_ * kinetic_.u_ * kinetic_.q_ -
-            dynamic_.z_dotw_ * kinetic_.u_ * kinetic_.q_ - body_.m_ * body_.z_g_ * kinetic_.w_ * kinetic_.q_ - body_.m_ * body_.x_g_ * kinetic_.u_ * kinetic_.q_ -
+            dynamic_.z_dotw_ * kinetic_.u_ * kinetic_.w_ - dynamic_.z_dotq_ * kinetic_.u_ * kinetic_.q_ - body_.m_ * body_.z_g_ * kinetic_.w_ * kinetic_.q_ - body_.m_ * body_.x_g_ * kinetic_.u_ * kinetic_.q_ -
             (body_.z_g_ * body_.w_ - body_.z_b_ * body_.b_) * sin(kinetic_.theta_) - (body_.x_g_ * body_.w_ - body_.x_b_ * body_.b_) * cos(kinetic_.theta_);
 
         // printf("Temp{a_tw:%f a_tq:%f a_ts:%f a_tb:%f f_t:%f}\n", depth_sf_.a_tw_, depth_sf_.a_tq_, depth_sf_.a_ts_, depth_sf_.a_tb_, depth_sf_.f_t_);
