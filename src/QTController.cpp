@@ -59,18 +59,18 @@ namespace qt_controller{
      * @brief Initialize with default paramters
      */ 
     void QTController::defaultInit(){
-        // double mass = 4390.0;
-        double mass = 815650.0;
+        double mass = 4390.0;
+        // double mass = 815650.0;
         // double bouy = 4690 * 9.81;
-        // double bouy = 4390 * 9.81;
-        double bouy = 815650 * 9.81;
+        double bouy = 4390 * 9.81;
+        // double bouy = 815650 * 9.81;
         double weight = mass * 9.81;
-        // double len = 8.534;
-        double len = 40.97;
-        // double bx = 0.0; double by = 0.0; double bz = -0.137;
-        double bx = 0.0; double by = 0.0; double bz = 0.0;
-        // double ixx = 1315.0; double iyy = 5900.0; double izz = 5057.0;
-        double ixx = 1436900.0; double iyy = 25510000.0; double izz = 24921000.0;
+        double len = 8.534;
+        // double len = 40.97;
+        double bx = 0.0; double by = 0.0; double bz = -0.137;
+        // double bx = 0.0; double by = 0.0; double bz = 0.0;
+        double ixx = 1315.0; double iyy = 5900.0; double izz = 5057.0;
+        // double ixx = 1436900.0; double iyy = 25510000.0; double izz = 24921000.0;
         setQTBodyParams(mass, len, weight, bouy, bx, by, bz, 0.0, 0.0, 0.0, ixx, iyy, izz);
         rho_ = 1025; 
         d00_ = 0.7159;
@@ -84,7 +84,7 @@ namespace qt_controller{
                           0.013, 0.013, -0.0844, -0.0844, 0.0);
         setForceParams(rho_, d2, d04, rouder_);
         // setCtrlParams(0.05, 0.05, 0.5, 0.15, 0.15, 0.4, 0.0, 0.0, 0.0, 0.01);
-        setCtrlParams(0.08, 0.1, 0.5, 0.15, 0.15, 0.4, 0.0, 0.0, 0.0, 0.1);
+        setCtrlParams(1.0, 1.0, 1.0, 1.5, 1.5, 0.4, 0.0, 0.0, 0.0, 0.1);
 
         depth_sf_.init();
         horizon_sf_.init();
@@ -203,7 +203,8 @@ namespace qt_controller{
         //        mission_.z_.pre_ref_, mission_.z_.pre_ref_dot_);
 
         // mission_.theta_.ref_ = input.pitch_d_ + 0.1 * atan((kinetic_.z_ - mission_.z_.ref_) / (4 * body_.l_));
-        mission_.theta_.ref_ = -0.33333 * atan(-(kinetic_.z_ - mission_.z_.ref_) / (1.5 * body_.l_));
+        // mission_.theta_.ref_ = -0.33333 * atan(-(kinetic_.z_ - mission_.z_.ref_) / (1.5 * body_.l_));
+        mission_.theta_.ref_ = -0.33333 * atan((kinetic_.z_ - mission_.z_.ref_) / (1.5 * body_.l_));
         mission_.theta_.ref_dot_ = (mission_.theta_.ref_ - mission_.theta_.pre_ref_) / dt;
         mission_.theta_.ref_dot2_ = (mission_.theta_.ref_dot_ - mission_.theta_.pre_ref_dot_) / dt;
         mission_.theta_.Update();
@@ -341,15 +342,14 @@ namespace qt_controller{
         deltar_ = 0.0;
     
         // printf("common3:%f\n", common3);
-
-        if(fabs(deltab_) > 30 / 57.3){
-            deltab_ = (30 / 57.3) * sign(deltab_);
+        if(fabs(deltab_) > 45 / 57.3){
+            deltab_ = (45 / 57.3) * sign(deltab_);
         }
-        if(fabs(deltas_) > 30 / 57.3){
-            deltas_ = (30 / 57.3) * sign(deltas_);
+        if(fabs(deltas_) > 45 / 57.3){
+            deltas_ = (45 / 57.3) * sign(deltas_);
         }
-        if(fabs(deltar_) > 30 / 57.3){
-            deltar_ = (30 / 57.3) * sign(deltar_);
+        if(fabs(deltar_) > 45 / 57.3){
+            deltar_ = (45 / 57.3) * sign(deltar_);
         }
 
         // Print control value of forward, afterward and orientation rouder
