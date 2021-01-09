@@ -16,6 +16,7 @@
 #include "ForceParams.h"
 #include "CtrlParams.h"
 #include "Dynamic.h"
+#include "PIDCtrlParams.h"
 #include "Common.h"
 
 namespace qt_controller{
@@ -80,7 +81,7 @@ namespace qt_controller{
         /**
          * @brief Default class initialization
          */
-        QTController();
+        QTController(int controller_type);
 
         /**
          * @brief Deconstructor
@@ -133,6 +134,11 @@ namespace qt_controller{
         void setCtrlParams(double c, double k, double alpha, unsigned int flag);
 
         /**
+         * @brief Set pid control parameters
+         */
+        void setPIDCtrlParams(double p, double i, double d);
+        
+        /**
          * @brief Set boundary thick
          */
         void setBoundaryThick(double bt){
@@ -178,6 +184,15 @@ namespace qt_controller{
          */
         void controllerRun(const QTKineticSensor& sensor, const QTControllerInput& input, QTControllerOutput& output, const double dt);
 
+        /**
+         * @brief Slide model control solution
+         */
+        void smcControllerRun(const QTKineticSensor& sensor, const QTControllerInput& input, QTControllerOutput& output, const double dt);
+
+        /**
+         * @brief PID model control solution
+         */
+        void pidControllerRun(const QTKineticSensor& sensor, const QTControllerInput& input, QTControllerOutput& output, const double dt);
     public:
         /**
          * @brief Serialize QT body parameters
@@ -272,7 +287,11 @@ namespace qt_controller{
         };
 
     private:
+        int controller_type_;
+
         QTBodyParams body_; 
+
+        // Slide model controller params 
         QTDynamic dynamic_;
         ForceParams force_;
         CtrlParams ctrl_;
@@ -285,6 +304,10 @@ namespace qt_controller{
         QTDepthSFStatus depth_sf_;
         QTHorizonSFStatus horizon_sf_;
 
+        // PID controller params 
+        PIDCtrlParams pid_; 
+        double factor_;
+        
         // Commands
         double deltab_, deltas_, deltar_;
 
@@ -297,6 +320,8 @@ namespace qt_controller{
         const unsigned int dfactors_num_ = 6;
         const unsigned int ctrl_num_ = 10;
         const unsigned int force_num_ = 6;
+
+        double dist_tolerance_;
     }; // QTController
 }; // ns
 
