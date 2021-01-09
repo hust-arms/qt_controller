@@ -31,7 +31,8 @@ namespace qt_controller{
 
         // Default parameters
         private_nh.param("base_frame", base_frame_, std::string("/base_link"));
-        private_nh.param("rpm", rpm_, 500);
+        // private_nh.param("rpm", rpm_, 500); // for std
+        private_nh.param("rpm", rpm_, 1000); // for 40m
         private_nh.param("control_period", dt_, 0.2);
         private_nh.param("xd", x_d_, 30.0);
         private_nh.param("yd", y_d_, 0.0);

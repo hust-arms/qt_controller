@@ -60,18 +60,18 @@ namespace qt_controller{
      * @brief Initialize with default paramters
      */ 
     void QTController::defaultInit(){
-        double mass = 4390.0;
-        // double mass = 815650.0;
+        // double mass = 4390.0;
+        double mass = 815650.0;
         // double bouy = 4690 * 9.81;
-        double bouy = 4390 * 9.81;
-        // double bouy = 815650 * 9.81;
+        // double bouy = 4390 * 9.81;
+        double bouy = 815650 * 9.81;
         double weight = mass * 9.81;
-        double len = 8.534;
-        // double len = 40.97;
+        // double len = 8.534;
+        double len = 40.97;
         double bx = 0.0; double by = 0.0; double bz = -0.137;
         // double bx = 0.0; double by = 0.0; double bz = 0.0;
-        double ixx = 1315.0; double iyy = 5900.0; double izz = 5057.0;
-        // double ixx = 1436900.0; double iyy = 25510000.0; double izz = 24921000.0;
+        // double ixx = 1315.0; double iyy = 5900.0; double izz = 5057.0;
+        double ixx = 1436900.0; double iyy = 25510000.0; double izz = 24921000.0;
         setQTBodyParams(mass, len, weight, bouy, bx, by, bz, 0.0, 0.0, 0.0, ixx, iyy, izz);
         rho_ = 1025; 
         d00_ = 0.7159;
