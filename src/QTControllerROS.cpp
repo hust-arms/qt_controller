@@ -16,9 +16,11 @@ namespace qt_controller{
     /**
      * @brief Constructor
      */
-    QTControllerROS::QTControllerROS(std::string name){
+    QTControllerROS::QTControllerROS(std::string name, int ctrl_flag){
         ros::NodeHandle private_nh("~"); // private ros node handle
         ros::NodeHandle nh; // public ros node handle
+
+        controller_type_ = ctrl_flag;
 
         // Parameters setting
         std::vector<double> dynamic, body_params, ctrl_params, force_params; 
@@ -77,7 +79,7 @@ namespace qt_controller{
         fin4_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/O_29qt/fins/4/input", 1);
         fin5_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/O_29qt/fins/5/input", 1);
         
-        controller_ = new QTController();
+        controller_ = new QTController(controller_type_);
 
         /* parameters setting */
         /*
@@ -244,14 +246,18 @@ namespace qt_controller{
         fins_msg.data = -rouder;
         fin5_pub_.publish(fins_msg);
         // Forward fins
-        fins_msg.data = fwdfin;
+        // fins_msg.data = fwdfin;
+        fins_msg.data = -fwdfin;
         fin0_pub_.publish(fins_msg);
         fins_msg.data = -fwdfin;
+        // fins_msg.data = fwdfin;
         fin1_pub_.publish(fins_msg);
         // Backward fins
         fins_msg.data = -aftfin;
+        // fins_msg.data = aftfin;
         fin2_pub_.publish(fins_msg);
-        fins_msg.data = aftfin;
+        // fins_msg.data = aftfin;
+        fins_msg.data = -aftfin;
         fin4_pub_.publish(fins_msg);
     }
 
