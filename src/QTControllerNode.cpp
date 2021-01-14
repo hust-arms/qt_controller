@@ -12,8 +12,15 @@
 int main(int argc, char** argv){
     ros::init(argc, argv, "qt_controller_node");
 
-    std::string auv_ns = "uvsm";
-    qt_controller::QTControllerROS QT_controller(auv_ns);
+    std::string ns = "O_29qt";
+    
+    if(argc == 2){
+        if(strcmp(argv[1], "uvms") == 0){
+            ns = "uvms";
+        }
+    }
+
+    qt_controller::QTControllerROS QT_controller(ns);
 
     ros::spin();
 
