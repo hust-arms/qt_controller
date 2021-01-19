@@ -16,9 +16,13 @@ namespace qt_controller{
     /**
      * @brief Constructor
      */
-    QTControllerROS::QTControllerROS(std::string ns){
+    QTControllerROS::QTControllerROS(std::string ns, int ctrl_flag){
         ros::NodeHandle private_nh("~"); // private ros node handle
         ros::NodeHandle nh; // public ros node handle
+
+        printf("Controller initialization\n");
+
+        controller_type_ = ctrl_flag;
 
         // Parameters setting
         std::vector<double> dynamic, body_params, ctrl_params, force_params; 
@@ -29,11 +33,12 @@ namespace qt_controller{
 
         // Default parameters
         private_nh.param("base_frame", base_frame_, std::string("/base_link"));
-        private_nh.param("rpm", rpm_, 500);
+        // private_nh.param("rpm", rpm_, 500); // for std
+        private_nh.param("rpm", rpm_, 750); // for 40m
         private_nh.param("control_period", dt_, 0.2);
         private_nh.param("xd", x_d_, 30.0);
         private_nh.param("yd", y_d_, 0.0);
-        private_nh.param("depthd", depth_d_, 20.0);
+        private_nh.param("depthd", depth_d_, 40.0);
         double pitch_d = 0.0 * degree2rad;
         double yaw_d = 0.0 * degree2rad;
         private_nh.param("pitchd", pitch_d_, pitch_d);
@@ -43,24 +48,6 @@ namespace qt_controller{
         printf("Target:{rpm:%d ctrl_period:%f x:%f y:%f depth:%f pitch:%f yaw:%f}\n", rpm_, dt_, x_d_, y_d_, depth_d_, pitch_d_, yaw_d_);
 
         // Initialization of publisher and subscriber
-        /*
-        imu_sub_ = nh.subscribe<sensor_msgs::Imu>("/uvsm/imu", 1, boost::bind(&QTControllerROS::imuCb, this, _1));
-        pressure_sub_ = nh.subscribe<sensor_msgs::FluidPressure>("/uvsm/pressure", 1, boost::bind(&QTControllerROS::pressureCb, this, _1)); 
-	    posegt_sub_ = nh.subscribe<nav_msgs::Odometry>("/uvsm/pose_gt", 1, boost::bind(&QTControllerROS::posegtCb, this, _1));
-        depth_sub_ = nh.subscribe<std_msgs::Float64>("/uvsm/control_input/depth", 1, boost::bind(&QTControllerROS::depthCb, this, _1));
-        pitch_sub_ = nh.subscribe<std_msgs::Float64>("/uvsm/control_input/pitch", 1, boost::bind(&QTControllerROS::pitchCb, this, _1));
-        yaw_sub_ = nh.subscribe<std_msgs::Float64>("/uvsm/control_input/yaw", 1, boost::bind(&QTControllerROS::yawCb, this, _1));
-        dvl_sub_ = nh.subscribe<uuv_sensor_ros_plugins_msgs::DVL>("/uvsm/dvl", 1, boost::bind(&QTControllerROS::dvlCb, this, _1));
-
-        thruster0_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/uvsm/thrusters/0/input", 1);
-        fin0_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/uvsm/fins/0/input", 1);
-        fin1_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/uvsm/fins/1/input", 1);
-        fin2_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/uvsm/fins/2/input", 1);
-        fin3_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/uvsm/fins/3/input", 1);
-        fin4_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/uvsm/fins/4/input", 1);
-        fin5_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/uvsm/fins/5/input", 1);
-        */
-
         imu_sub_ = nh.subscribe<sensor_msgs::Imu>("/" + ns + "/imu", 1, boost::bind(&QTControllerROS::imuCb, this, _1));
         pressure_sub_ = nh.subscribe<sensor_msgs::FluidPressure>("/" + ns + "/pressure", 1, boost::bind(&QTControllerROS::pressureCb, this, _1)); 
 	    posegt_sub_ = nh.subscribe<nav_msgs::Odometry>("/" + ns + "/pose_gt", 1, boost::bind(&QTControllerROS::posegtCb, this, _1));
@@ -77,7 +64,7 @@ namespace qt_controller{
         fin4_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/" + ns + "/fins/4/input", 1);
         fin5_pub_ = nh.advertise<uuv_gazebo_ros_plugins_msgs::FloatStamped>("/" + ns + "/fins/5/input", 1);
         
-        controller_ = new QTController();
+        controller_ = new QTController(controller_type_);
 
         /* parameters setting */
         /*
@@ -244,14 +231,18 @@ namespace qt_controller{
         fins_msg.data = -rouder;
         fin5_pub_.publish(fins_msg);
         // Forward fins
-        fins_msg.data = fwdfin;
+        // fins_msg.data = fwdfin;
+        fins_msg.data = -fwdfin;
         fin0_pub_.publish(fins_msg);
         fins_msg.data = -fwdfin;
+        // fins_msg.data = fwdfin;
         fin1_pub_.publish(fins_msg);
         // Backward fins
         fins_msg.data = -aftfin;
+        // fins_msg.data = aftfin;
         fin2_pub_.publish(fins_msg);
-        fins_msg.data = aftfin;
+        // fins_msg.data = aftfin;
+        fins_msg.data = -aftfin;
         fin4_pub_.publish(fins_msg);
     }
 

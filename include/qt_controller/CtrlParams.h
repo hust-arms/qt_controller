@@ -59,12 +59,19 @@ namespace qt_controller{
         double pre_ref_;
         double pre_ref_dot_;
 
+        double det_;
+        double det_pre_;
+        double det_pre2_;
+
         /**
          * @brief Run and update values
          */
         void Update(){
             pre_ref_ = ref_;
             pre_ref_dot_ = ref_dot_;
+
+            det_pre2_ = det_pre_;
+            det_pre_ = det_;
         }
 
     }; // CtrlMissionVar
@@ -77,6 +84,7 @@ namespace qt_controller{
         CtrlMissionVar theta_;
         CtrlMissionVar psi_;
         double lateral_dist_;
+        double vertical_dist_;
     }; // CtrlMissionParams
 }; // ns
 

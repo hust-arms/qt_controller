@@ -38,7 +38,7 @@ namespace qt_controller{
         /**
          * @brief Constructor
          */
-        QTControllerROS(std::string name);
+        QTControllerROS(std::string name, int ctrl_flag = 0);
 
         /**
          * @brief Deconstructor
@@ -251,6 +251,8 @@ namespace qt_controller{
         ros::Subscriber imu_sub_, pressure_sub_, posegt_sub_, dvl_sub_; // sensors messages sub
         ros::Subscriber depth_sub_, pitch_sub_, yaw_sub_; // desired parameters sub
         ros::Subscriber x_d_sub_, y_d_sub_;
+
+        int controller_type_;
 
         double dt_; // control period
         int rpm_; // rotate per minutes of thruster

@@ -11,7 +11,8 @@
 #include "qt_controller/QTController.h"
 
 namespace qt_controller{
-    QTController::QTController(){
+    QTController::QTController(int controller_type){
+        controller_type_ = controller_type;
         defaultInit();
     }
 
@@ -59,18 +60,18 @@ namespace qt_controller{
      * @brief Initialize with default paramters
      */ 
     void QTController::defaultInit(){
-        double mass = 4390.0;
-        // double mass = 815650.0;
+        // double mass = 4390.0;
+        double mass = 815650.0;
         // double bouy = 4690 * 9.81;
-        double bouy = 4390 * 9.81;
-        // double bouy = 815650 * 9.81;
+        // double bouy = 4390 * 9.81;
+        double bouy = 815650 * 9.81;
         double weight = mass * 9.81;
-        double len = 8.534;
-        // double len = 40.97;
+        // double len = 8.534;
+        double len = 40.97;
         double bx = 0.0; double by = 0.0; double bz = -0.137;
         // double bx = 0.0; double by = 0.0; double bz = 0.0;
-        double ixx = 1315.0; double iyy = 5900.0; double izz = 5057.0;
-        // double ixx = 1436900.0; double iyy = 25510000.0; double izz = 24921000.0;
+        // double ixx = 1315.0; double iyy = 5900.0; double izz = 5057.0;
+        double ixx = 1436900.0; double iyy = 25510000.0; double izz = 24921000.0;
         setQTBodyParams(mass, len, weight, bouy, bx, by, bz, 0.0, 0.0, 0.0, ixx, iyy, izz);
         rho_ = 1025; 
         d00_ = 0.7159;
@@ -83,11 +84,16 @@ namespace qt_controller{
                           -0.699, 0.699, -0.621, 0.621, 0.0,
                           0.013, 0.013, -0.0844, -0.0844, 0.0);
         setForceParams(rho_, d2, d04, rouder_);
-        // setCtrlParams(0.05, 0.05, 0.5, 0.15, 0.15, 0.4, 0.0, 0.0, 0.0, 0.01);
-        setCtrlParams(1.0, 1.0, 1.0, 1.5, 1.5, 0.4, 0.0, 0.0, 0.0, 0.1);
+        // setCtrlParams(0.5, 0.5, 0.5, 0.15, 0.15, 0.4, 0.0, 0.0, 0.0, 0.01);
+        
+        // setCtrlParams(0.25, 0.25, 0.5, 0.1, 0.1, 0.4, 0.0, 0.0, 0.0, 0.01);
+        setCtrlParams(0.5, 0.5, 0.5, 0.1, 0.1, 0.4, 0.0, 0.0, 0.0, 0.01);
+        setPIDCtrlParams(10.0, 1.8, 0.0);
 
         depth_sf_.init();
         horizon_sf_.init();
+
+        factor_ = 4.0;
 
         /* Initialize mission control variable */
         mission_.z_.ref_ = 0.0;
@@ -95,19 +101,28 @@ namespace qt_controller{
         mission_.z_.ref_dot2_ = 0.0;
         mission_.z_.pre_ref_ = 0.0;
         mission_.z_.pre_ref_dot_ = 0.0;
+        mission_.z_.det_ = 0.0;
+        mission_.z_.det_pre_ = 0.0;
+        mission_.z_.det_pre2_ = 0.0;
 
         mission_.theta_.ref_ = 0.0;
         mission_.theta_.ref_dot_ = 0.0;
         mission_.theta_.ref_dot2_ = 0.0;
         mission_.theta_.pre_ref_ = 0.0;
         mission_.theta_.pre_ref_dot_ = 0.0;
+        mission_.theta_.det_ = 0.0;
+        mission_.theta_.det_pre_ = 0.0;
+        mission_.theta_.det_pre2_ = 0.0;
 
         mission_.psi_.ref_ = 0.0;
         mission_.psi_.ref_dot_ = 0.0;
         mission_.psi_.ref_dot2_ = 0.0;
         mission_.psi_.pre_ref_ = 0.0;
         mission_.psi_.pre_ref_dot_ = 0.0;
-
+        mission_.psi_.det_ = 0.0;
+        mission_.psi_.det_pre_ = 0.0;
+        mission_.psi_.det_pre2_ = 0.0;
+        
         deltab_ = 0.0; deltas_ = 0.0; deltar_ = 0.0;
     }
 
@@ -143,6 +158,12 @@ namespace qt_controller{
         default:
             break;
         }
+    }
+
+    void QTController::setPIDCtrlParams(double p, double i, double d){
+        pid_.p_ = p;
+        pid_.i_ = i;
+        pid_.d_ = d;
     }
 
     /**
@@ -184,10 +205,16 @@ namespace qt_controller{
         str << " boundary thick: " << ctrl_.bondary_thick_;
     }
 
-    /**
-     * @brief Control solution
-     */
-    void QTController::controllerRun(const QTKineticSensor& sensor, const QTControllerInput& input, QTControllerOutput& output, const double dt)
+
+    void QTController::controllerRun(const QTKineticSensor& sensor, const QTControllerInput& input, QTControllerOutput& output, const double dt){
+        if(controller_type_ == 0){
+            smcControllerRun(sensor, input, output, dt);
+            return;
+        }
+        pidControllerRun(sensor, input, output, dt);
+    }
+
+    void QTController::smcControllerRun(const QTKineticSensor& sensor, const QTControllerInput& input, QTControllerOutput& output, const double dt)
     {
         // Update kinetic parameters
         kinetic_.setPosition(sensor.x_, sensor.y_, sensor.z_, sensor.roll_, sensor.pitch_, sensor.yaw_);
@@ -350,6 +377,63 @@ namespace qt_controller{
         }
         if(fabs(deltar_) > 45 / 57.3){
             deltar_ = (45 / 57.3) * sign(deltar_);
+        }
+
+        // Print control value of forward, afterward and orientation rouder
+        printf("forward fin: %f afterward fin: %f rouder: %f", deltab_, deltas_, deltar_);
+
+        output.fwd_fin_ = deltab_;
+        output.aft_fin_ = deltas_;
+        output.rouder_ = deltar_;
+    };
+    
+    void QTController::pidControllerRun(const QTKineticSensor& sensor, const QTControllerInput& input, QTControllerOutput& output, const double dt)
+    {
+        // Update kinetic parameters
+        kinetic_.setPosition(sensor.x_, sensor.y_, sensor.z_, sensor.roll_, sensor.pitch_, sensor.yaw_);
+        // kinetic_.setVelocity(sensor.x_dot_, sensor.y_dot_, sensor.z_dot_, sensor.roll_dot_, sensor.pitch_dot_, sensor.yaw_dot_);
+        kinetic_.setVelocity(sensor.x_dot_, 0.0, sensor.z_dot_, sensor.roll_dot_, sensor.pitch_dot_, sensor.yaw_dot_);
+
+        mission_.vertical_dist_ = (kinetic_.x_ - input.x_d_) * sin(input.pitch_d_) - (kinetic_.z_ - input.depth_d_) * cos(input.pitch_d_);
+        printf("VerticalDist:%f\n", mission_.vertical_dist_);
+
+        double line_dir = atan2(0.0, input.x_d_);
+
+        double ye = (kinetic_.z_ - input.depth_d_) * std::cos(line_dir);
+
+        // LOS logic
+        mission_.theta_.ref_ = -atan2(ye, factor_);
+        mission_.theta_.ref_dot_ = (mission_.theta_.ref_ - mission_.theta_.pre_ref_) / dt;
+        mission_.theta_.ref_dot2_ = (mission_.theta_.ref_dot_ - mission_.theta_.pre_ref_dot_) / dt;
+        mission_.theta_.det_ = mission_.theta_.ref_ - (kinetic_.theta_ - line_dir);
+        if(mission_.theta_.det_ > pi){
+            mission_.theta_.det_ -= 2 * pi;
+        }
+        if(mission_.theta_.det_ < -pi){
+            mission_.theta_.det_ += 2 * pi;
+        }
+        mission_.theta_.Update();
+
+        printf("ye:%f line_dir:%f ref_picth:%f\n", ye, line_dir, mission_.theta_.ref_);
+
+        double det_pitch = mission_.theta_.det_;
+        double pre_det_pitch = mission_.theta_.det_pre_;
+        double pre2_det_pitch = mission_.theta_.det_pre2_;
+        double r = pid_.p_*(det_pitch - pre_det_pitch) + pid_.i_ * pre_det_pitch + pid_.d_ * (det_pitch - 2 * pre2_det_pitch + pre_det_pitch);
+        deltab_ = r;
+        deltas_ = deltab_;
+        deltar_ = 0.0;
+        
+        mission_.theta_.Update();
+        
+        if(fabs(deltab_) > 25 / 57.3){
+            deltab_ = (25 / 57.3) * sign(deltab_);
+        }
+        if(fabs(deltas_) > 25 / 57.3){
+            deltas_ = (25 / 57.3) * sign(deltas_);
+        }
+        if(fabs(deltar_) > 25 / 57.3){
+            deltar_ = (25 / 57.3) * sign(deltar_);
         }
 
         // Print control value of forward, afterward and orientation rouder
