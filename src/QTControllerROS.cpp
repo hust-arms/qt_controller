@@ -34,11 +34,11 @@ namespace qt_controller{
         // Default parameters
         private_nh.param("base_frame", base_frame_, std::string("/base_link"));
         // private_nh.param("rpm", rpm_, 500); // for std
-        private_nh.param("rpm", rpm_, 1000); // for 40m
+        private_nh.param("rpm", rpm_, 750); // for 40m
         private_nh.param("control_period", dt_, 0.2);
         private_nh.param("xd", x_d_, 30.0);
         private_nh.param("yd", y_d_, 0.0);
-        private_nh.param("depthd", depth_d_, 20.0);
+        private_nh.param("depthd", depth_d_, 40.0);
         double pitch_d = 0.0 * degree2rad;
         double yaw_d = 0.0 * degree2rad;
         private_nh.param("pitchd", pitch_d_, pitch_d);

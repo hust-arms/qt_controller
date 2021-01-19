@@ -25,14 +25,15 @@ int main(int argc, char** argv){
         ctrl_flag = 1;
     }
     else if(argc == 2 && strcmp(argv[1], "uvms") == 0){
-        printf("use namespace with uvms");
+        printf("use namespace with uvms\n");
+        ns = "uvms";
     }
     else{
         printf("select controller: slide model, default namespace: O_29qt\n");
     }
 
     if(argc == 3 && strcmp(argv[2], "uvms") == 0){
-        printf("use namespace with uvms");
+        printf("use namespace with uvms\n");
         ns = "uvms";
     }
 
